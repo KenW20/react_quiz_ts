@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { fetchQuizQuestions } from './API';
+import React, { useState, FC } from 'react';
+import { fetchQuestions } from './API';
 // Components
 import QuestionCard from './components/QuestionCard';
+import Option from './components/Option';
 // Types
-import { QuestionState, Difficulty } from './API';
+import { QuestionState, Category, Difficulty } from './API';
 // Styles
 import { GlobalStyle, Wrapper } from './App.styles';
 
@@ -16,7 +17,7 @@ export type AnswerObject = {
 
 const TOTAL_QUESTION = 10;
 
-const App = () => {
+const App: FC = () => {
 
   const [loading, setLoading] = useState(false);
   const [questions, setQuestions] = useState<QuestionState[]>([]);
@@ -24,17 +25,14 @@ const App = () => {
   const [userAnswers, setUserAnswers] = useState<AnswerObject[]>([]);
   const [score, setScore] = useState(0);
   const [gameOver, setGameOver] = useState(true);
-
-  //console.log(fetchQuizQuestions(TOTAL_QUESTION, Difficulty.EASY ));
-  console.log(questions);
+  const [option, setOption] = useState({ category: Category.Computers, difficulty: Difficulty.EASY });
 
   const startTrivia = async () => {
     setLoading(true);
     setGameOver(false);
 
-    const newQuestions = await fetchQuizQuestions(
-      TOTAL_QUESTION,
-      Difficulty.EASY
+    const newQuestions = await fetchQuestions(
+      TOTAL_QUESTION, option.category, option.difficulty
     );
     setQuestions(newQuestions);
 
@@ -73,6 +71,11 @@ const App = () => {
     }
   };
 
+  const checkOption = (option: { category: Category, difficulty: Difficulty }) => {
+    console.log(option);
+    setOption(option);
+  };
+
   return (
     <>
       <GlobalStyle />
@@ -80,9 +83,10 @@ const App = () => {
         <h1>Trivia Quiz</h1>
 
         {gameOver || userAnswers.length === TOTAL_QUESTION ?
-          (<button className="start" onClick={startTrivia}>
-            Start
-          </button>
+          (<div className="start-region">
+            <button className="start" onClick={startTrivia}>Start</button>
+            <Option category={option.category} difficulty={option.difficulty} callback={checkOption} />
+          </div>
           ) : null}
 
         {!gameOver ? <p className="score">Score: {score}</p> : null}
